@@ -11,7 +11,7 @@
 	<artifactId>product-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>product-service</name>
-	<description>product services</description>
+	<description>product service</description>
 
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
