@@ -8,5 +8,6 @@ spring:
         host: localhost
         port: 27017
         database: product-service
+        uri: mongodb://localhost:27017/product
 server:
   port: 9001
