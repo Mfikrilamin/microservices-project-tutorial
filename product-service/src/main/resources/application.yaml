@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: product-service
+  profiles:
+    active: default
+  data:
+    mongodb:
+        host: localhost
+        port: 27017
+        database: product-service
+server:
+  port: 9001
