@@ -1,0 +1,18 @@
+## To start the the docker (Assuming you are at MICROSERVICES-PROJECT directory)
+docker run --name order-services-postgres -e POSTGRES_PASSWORD=admin -d -p 5432:5432 -v $PWD/order-service/src/main/resources/db/init.sql:/docker-entrypoint-initdb.d/init.sql postgres
+
+##To connect to query tool in the docker CLI
+psql -h localhost -U postgres
+
+##Check list of database in docker CLI
+\l
+
+##go into the database
+\c orderservice
+
+
+##To stop the docker
+docker stop order-services-postgres
+
+##To remove the container
+docker rm order-services-postgres
