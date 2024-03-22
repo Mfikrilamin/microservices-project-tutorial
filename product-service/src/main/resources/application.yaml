@@ -4,8 +4,8 @@ server:
 spring:
   application:
     name: product-service
-  profiles:
-    active: default
+  # profiles:
+  #   active: default
   data:
     mongodb:
       host: localhost
