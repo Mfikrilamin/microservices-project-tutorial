@@ -21,7 +21,7 @@ public class DataLoader implements CommandLineRunner {
 
         Inventory inventory1 = new Inventory();
         inventory1.setSkuCode("iphone_13_red");
-        inventory1.setQuantity(0);
+        inventory1.setQuantity(2);
 
         inventoryRepository.save(inventory);
         inventoryRepository.save(inventory1);
