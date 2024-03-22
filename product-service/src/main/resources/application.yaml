@@ -1,3 +1,6 @@
+server:
+  port: 9001
+
 spring:
   application:
     name: product-service
@@ -5,9 +8,14 @@ spring:
     active: default
   data:
     mongodb:
-        host: localhost
-        port: 27017
-        database: product-service
-        uri: mongodb://localhost:27017/product
-server:
-  port: 9001
+      host: localhost
+      port: 27017
+      database: product-service
+      # username: root
+      # password: example
+      # uri: mongodb://localhost:27017/product
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka

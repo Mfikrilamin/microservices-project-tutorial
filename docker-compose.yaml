@@ -1,5 +1,6 @@
 version: "3.8"
 services:
+  # Postgres db server
   order-service-postgres:
     image: postgres
     container_name: order-service-postgres
@@ -9,15 +10,9 @@ services:
       - "5433:5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      # POSTGRES_USER: ${POSTGRES_USER}
-    # user: postgres
-    # command: >
-    #   sh -c "postgres postgres -D /var/lib/postgresql/data &&
-    #           psql -U postgres postgres -f /docker-entrypoint-initdb.d/init-user-db.sh"
     volumes:
       - order-service-postgres:/var/lib/postgresql/data/
       - ./order-service/src/main/resources/db:/docker-entrypoint-initdb.d
-
   inventory-service-postgres:
     image: postgres
     container_name: inventory-service-postgres
@@ -27,15 +22,31 @@ services:
       - "5434:5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      # POSTGRES_USER: ${POSTGRES_USER}
-    # user: postgres
-    # command: >
-    #   sh -c "postgres postgres -D /var/lib/postgresql/data &&
-    #           psql -U postgres postgres -f /docker-entrypoint-initdb.d/init-user-db.sh"
     volumes:
       - inventory-service-postgres:/var/lib/postgresql/data/
       - ./inventory-service/src/main/resources/db:/docker-entrypoint-initdb.d
 
+  # Mongo db server
+  product-service-mongodb:
+    image: mongo
+    container_name: product-service-mongodb
+    labels:
+      com.microservice-project-tutorial.product-service: product-service
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+    # environment:
+    # MONGO_INITDB_DATABASE: product-service
+    # MONGODB_USERNAME: ${MONGODB_USERNAME}
+    # MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+    # MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+    # MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    volumes:
+      - mongo-data:/data/db
+      - ./product-service/src/main/resources/db:/docker-entrypoint-initdb.d
+
 volumes:
   order-service-postgres:
   inventory-service-postgres:
+  mongo-data:
