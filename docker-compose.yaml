@@ -1,23 +1,41 @@
 version: "3.8"
 services:
-  postgres_orderservice:
+  order-service-postgres:
     image: postgres
+    container_name: order-service-postgres
+    labels:
+      com.microservice-project-tutorial.order-service: order-service
     ports:
       - "5433:5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # POSTGRES_USER: ${POSTGRES_USER}
+    # user: postgres
+    # command: >
+    #   sh -c "postgres postgres -D /var/lib/postgresql/data &&
+    #           psql -U postgres postgres -f /docker-entrypoint-initdb.d/init-user-db.sh"
     volumes:
-      - postgres_orderservice_data:/var/lib/postgresql/data/
+      - order-service-postgres:/var/lib/postgresql/data/
+      - ./order-service/src/main/resources/db:/docker-entrypoint-initdb.d
 
-  postgres_inventoryservice:
+  inventory-service-postgres:
     image: postgres
+    container_name: inventory-service-postgres
+    labels:
+      com.microservice-project-tutorial.inventory-service: inventory-service
     ports:
       - "5434:5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # POSTGRES_USER: ${POSTGRES_USER}
+    # user: postgres
+    # command: >
+    #   sh -c "postgres postgres -D /var/lib/postgresql/data &&
+    #           psql -U postgres postgres -f /docker-entrypoint-initdb.d/init-user-db.sh"
     volumes:
-      - postgres_inventoryservice_data:/var/lib/postgresql/data/
+      - inventory-service-postgres:/var/lib/postgresql/data/
+      - ./inventory-service/src/main/resources/db:/docker-entrypoint-initdb.d
 
 volumes:
-  postgres_orderservice_data:
-  postgres_inventoryservice_data:
+  order-service-postgres:
+  inventory-service-postgres:
