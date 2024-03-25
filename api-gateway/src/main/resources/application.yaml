@@ -9,8 +9,8 @@ spring:
   ## Gateway
   cloud:
     gateway:
-      # default-filters:
-      #   - TokenRelay=
+      default-filters:
+        - TokenRelay=
       routes:
         - id: product-service
           uri: lb://product-service
@@ -39,17 +39,18 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
-    # client:
-    #   provider:
-    #     keycloak:
-    #       issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
-    #   registration:
-    #     spring-cloud-client:
-    #       provider: keycloak
-    #       client-id: spring-cloud-client
-    #       client-secret: pztyv7oqhiHdAc0wiXWQquU5VwKAIoqK
-    #       authorization-grant-type: authorization_code
-    #       scope: openid
+          jwk-set-uri: http://localhost:8181/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
+        registration:
+          spring-cloud-client:
+            provider: keycloak
+            client-id: spring-cloud-client
+            client-secret: pztyv7oqhiHdAc0wiXWQquU5VwKAIoqK
+            authorization-grant-type: authorization_code
+            scope: openid
 
 ## Eureka
 eureka:
