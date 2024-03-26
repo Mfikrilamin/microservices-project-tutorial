@@ -104,7 +104,7 @@ public class OrderService {
                 // manually call the fallback method in case of TimeoutException
                 // fallFn(ex);
                 LOGGER.info(ex.getMessage());
-                return ex.getMessage();
+                throw ex;
             }
         };
         return executor.submit(taskDecorateWithTimeout).get();

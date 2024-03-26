@@ -1,0 +1,4 @@
+Realm name: spring-boot-microservice-realm
+Client id: spring-cloud-client
+Valid redirect URI : *
+Web origins: *

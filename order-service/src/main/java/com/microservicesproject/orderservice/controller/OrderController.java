@@ -18,7 +18,7 @@ import com.microservicesproject.orderservice.dto.OrderRequest;
 import com.microservicesproject.orderservice.service.OrderService;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -32,6 +32,7 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @CircuitBreaker(name = "inventory", fallbackMethod = "fallbackMethod")
+    @Retry(name = "inventory")
     // @TimeLimiter(name = "inventory", fallbackMethod = "fallbackMethod")
     public String placeOrder(@RequestBody OrderRequest orderRequest) throws Exception {
         LOGGER.info("Placing Order");
@@ -43,6 +44,7 @@ public class OrderController {
     // caller/parent function
     // TODO : To implement a more appropriate response status code instead of 201
     // which follow the caller/parent function
+    @ResponseStatus(HttpStatus.GATEWAY_TIMEOUT)
     public CompletableFuture<String> fallbackMethod(OrderRequest orderRequest,
             RuntimeException runtimeException) {
         LOGGER.info("Cannot Place Order Executing Fallback logic");
