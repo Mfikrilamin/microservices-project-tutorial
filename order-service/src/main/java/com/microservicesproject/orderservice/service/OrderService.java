@@ -61,7 +61,6 @@ public class OrderService {
         return webClientBuilder.build().get()
                 .uri("http://inventory-service:8082/api/inventory",
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
-                // .headers(header -> header.setBearerAuth(token))
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
                 .block();
