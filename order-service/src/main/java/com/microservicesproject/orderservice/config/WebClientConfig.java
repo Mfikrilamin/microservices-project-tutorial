@@ -15,4 +15,5 @@ public class WebClientConfig {
         // Add a filter to exchange bearer token for authorization purposes
         return WebClient.builder().filter(new ServletBearerExchangeFilterFunction());
     }
+
 }

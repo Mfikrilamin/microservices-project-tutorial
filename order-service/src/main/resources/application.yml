@@ -60,3 +60,4 @@ resilience4j:
     instances:
       inventory:
         timeout-duration: 3s
+        cancel-running-future: true
