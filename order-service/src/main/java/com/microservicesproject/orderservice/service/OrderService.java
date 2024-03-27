@@ -40,9 +40,9 @@ public class OrderService {
     private final WebClient.Builder webClientBuilder;
 
     public Future<InventoryResponse[]> placeOrderWrapper(List<String> skuCodes, SecurityContext originalContext) {
-        ExecutorService executors = Executors.newFixedThreadPool(5);
+        ExecutorService executors = Executors.newFixedThreadPool(3);
 
-        return executors.submit(() -> {
+        Future<InventoryResponse[]> futureResult = executors.submit(() -> {
             try {
                 // Restore security context in the new thread
                 SecurityContextHolder.setContext(originalContext);
@@ -55,6 +55,9 @@ public class OrderService {
                 SecurityContextHolder.clearContext();
             }
         });
+
+        executors.shutdown();
+        return futureResult;
     }
 
     public InventoryResponse[] getInventoryResponse(List<String> skuCodes) {
