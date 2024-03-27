@@ -22,12 +22,12 @@ public class InventoryService {
     @Transactional(readOnly = true)
     public List<InventoryResponse> isInStock(List<String> skuCode) {
         LOGGER.info("Wait Started");
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        // try {
+        // Thread.sleep(10000);
+        // } catch (InterruptedException e) {
+        // // TODO Auto-generated catch block
+        // e.printStackTrace();
+        // }
         LOGGER.info("Wait ended");
         return inventoryRepository.findBySkuCodeIn(skuCode).stream()
                 .map(inventory -> InventoryResponse.builder()

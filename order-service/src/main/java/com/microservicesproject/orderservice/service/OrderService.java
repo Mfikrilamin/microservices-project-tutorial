@@ -28,6 +28,8 @@ import com.microservicesproject.orderservice.repository.OrderRepository;
 
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,6 +40,7 @@ public class OrderService {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
+    private final ObservationRegistry observationRegistry;
 
     public Future<InventoryResponse[]> placeOrderWrapper(List<String> skuCodes, SecurityContext originalContext) {
         ExecutorService executors = Executors.newFixedThreadPool(3);
@@ -61,12 +64,17 @@ public class OrderService {
     }
 
     public InventoryResponse[] getInventoryResponse(List<String> skuCodes) {
-        return webClientBuilder.build().get()
-                .uri("http://inventory-service:8082/api/inventory",
-                        uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
-                .retrieve()
-                .bodyToMono(InventoryResponse[].class)
-                .block();
+        Observation inventoryObservationService = Observation.createNotStarted("inventory-service-lookup",
+                this.observationRegistry);
+        inventoryObservationService.lowCardinalityKeyValue("call", "inventory-service");
+        return inventoryObservationService.observe(() -> {
+            return webClientBuilder.build().get()
+                    .uri("http://inventory-service:8082/api/inventory",
+                            uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
+                    .retrieve()
+                    .bodyToMono(InventoryResponse[].class)
+                    .block();
+        });
     }
 
     public String placeOrder(OrderRequest orderRequest) throws InterruptedException, ExecutionException {
