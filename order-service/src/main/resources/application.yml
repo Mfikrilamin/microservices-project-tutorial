@@ -1,5 +1,8 @@
 server:
   port: 8081
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 spring:
   application:
@@ -41,6 +44,14 @@ management:
   endpoint:
     health:
       show-details: always
+  # Zipkin distributed tracing
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+      # http://localhost:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0
 
 # Resilience4j properties
 resilience4j:
@@ -61,4 +72,3 @@ resilience4j:
       inventory:
         max-attempts: 3
         wait-duration: 5s
-

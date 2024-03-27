@@ -1,6 +1,10 @@
 server:
   port: 8761
 
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
 spring:
   application:
     name: discovery-server
@@ -11,3 +15,13 @@ eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+
+## Zipkin distributed tracing
+management:
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+      # http://localhost:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0
