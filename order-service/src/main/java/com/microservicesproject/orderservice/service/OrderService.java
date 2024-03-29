@@ -13,6 +13,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.microservicesproject.orderservice.dto.InventoryResponse;
 import com.microservicesproject.orderservice.dto.OrderLineitemsDto;
 import com.microservicesproject.orderservice.dto.OrderRequest;
+import com.microservicesproject.orderservice.event.OrderPlacedEvent;
 import com.microservicesproject.orderservice.model.Order;
 import com.microservicesproject.orderservice.model.OrderLineItem;
 import com.microservicesproject.orderservice.repository.OrderRepository;
@@ -41,6 +43,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final WebClient.Builder webClientBuilder;
     private final ObservationRegistry observationRegistry;
+    private final KafkaTemplate<String, OrderPlacedEvent> kafkaTemplate;
 
     public Future<InventoryResponse[]> placeOrderWrapper(List<String> skuCodes, SecurityContext originalContext) {
         ExecutorService executors = Executors.newFixedThreadPool(3);
@@ -107,6 +110,7 @@ public class OrderService {
                 // Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock);
                 if (Arrays.stream(inventoryResponses).allMatch(InventoryResponse::isInStock)) {
                     orderRepository.save(order);
+                    kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));
                     return "Order placed sucessfully";
                 } else {
                     throw new IllegalArgumentException("Product is not in stock, please try again later");
