@@ -26,6 +26,17 @@ spring:
         jwt:
           issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
           jwk-set-uri: http://localhost:8181/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
+  # Apache Kafka
+  kafka:
+    bootstrap:
+      servers: localhost:9092
+    template:
+      default-topic: notificationTopic
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties.spring.json.type.mapping: event:com.microservicesproject.orderservice.event.OrderPlacedEvent
+
 # Eureka
 eureka:
   client:
