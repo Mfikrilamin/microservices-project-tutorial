@@ -1,0 +1,11 @@
+#To access MYSQL command
+exec mysql -ukeycloak -ppassword keycloak
+
+#To get the list of all database
+show databases;
+
+#to switch database
+use keycloak
+
+#To get the list of all tables
+show tables;
