@@ -1,37 +1,35 @@
 version: "3.8"
 services:
-  # Postgres db server
+  # Order Postgres DB
   order-service-postgres:
     image: postgres
     container_name: order-service-postgres
-    labels:
-      com.microservice-project-tutorial.order-service: order-service
     ports:
-      - "5433:5432"
+      - "5433:5433"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - order-service-postgres:/var/lib/postgresql/data/
       - ./order-service/src/main/resources/db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+
+  # Iventory Postgres DB
   inventory-service-postgres:
     image: postgres
     container_name: inventory-service-postgres
-    labels:
-      com.microservice-project-tutorial.inventory-service: inventory-service
     ports:
-      - "5434:5432"
+      - "5434:5434"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - inventory-service-postgres:/var/lib/postgresql/data/
       - ./inventory-service/src/main/resources/db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
 
-  # Mongo db server
+  # Product Mongo DB
   product-service-mongodb:
     image: mongo
     container_name: product-service-mongodb
-    labels:
-      com.microservice-project-tutorial.product-service: product-service
     ports:
       - "27017:27017"
     expose:
@@ -44,9 +42,53 @@ services:
     # MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
     volumes:
       - mongo-data:/data/db
-      - ./product-service/src/main/resources/db:/docker-entrypoint-initdb.d
+      # - ./product-service/src/main/resources/db:/docker-entrypoint-initdb.d
+    restart: unless-stopped
 
-  # Apache Kafka
+  # Keycloak Config with MySQL Database
+  keycloak-mysql:
+    container_name: keycloak-mysql
+    image: mysql:8.3.0
+    volumes:
+      - mysql_keycloak_data:/var/lib/mysql
+      - mysql_keycloak_data2:/data/db
+      - ./keycloak/db/:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: keycloak
+      MYSQL_PASSWORD: password
+    restart: unless-stopped
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:24.0.1
+    command: ["start-dev", "--import-realm"]
+    environment:
+      # DB_VENDOR: MYSQL
+      # DB_ADDR: keycloak-mysql
+      # DB_DATABASE: keycloak
+      # DB_USER: keycloak
+      # DB_PASSWORD: password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: mysql
+      KC_DB_URL_HOST: keycloak-mysql
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+      KC_DB_URL: jdbc:mysql://keycloak-mysql:3306/keycloak
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/realm/:/opt/keycloak/data/import/
+      - keycloak_data_container:/opt/jboss/keycloak/standalone/data
+    depends_on:
+      - keycloak-mysql
+    restart: unless-stopped
+
+  # Zookeeper and Apache Kafka
   zookeeper:
     image: confluentinc/cp-zookeeper
     container_name: zookeeper
@@ -61,6 +103,7 @@ services:
     container_name: broker
     ports:
       - "9092:9092"
+      - "29092:29092"
     depends_on:
       - zookeeper
     environment:
@@ -72,7 +115,104 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
 
+  # zipkin
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+  # Eureka Server
+  discovery-server:
+    image: fikrilamin/discovery-server:latest
+    container_name: discovery-server
+    pull_policy: always
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - zipkin
+
+  # API Gateway
+  api-gateway:
+    image: fikrilamin/api-gateway:latest
+    container_name: api-gateway
+    pull_policy: always
+    ports:
+      - "7080:7080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY=trace
+    depends_on:
+      - zipkin
+      - discovery-server
+      - keycloak
+    restart: unless-stopped
+
+  # Product-service
+  product-service:
+    container_name: product-service
+    image: fikrilamin/product-service:latest
+    pull_policy: always
+    ports:
+      - "9001:9001"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - product-service-mongodb
+      - discovery-server
+      - api-gateway
+
+  # Order-service
+  order-service:
+    container_name: order-service
+    image: fikrilamin/order-service:latest
+    pull_policy: always
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://order-service-postgres:5432/orderservice
+    depends_on:
+      - order-service-postgres
+      - broker
+      - zipkin
+      - discovery-server
+      - api-gateway
+
+  # Inventory-service docker
+  inventory-services:
+    container_name: inventory-service
+    image: fikrilamin/inventory-service:latest
+    pull_policy: always
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://inventory-service-postgres:5432/inventoryservice
+    depends_on:
+      - inventory-service-postgres
+      - discovery-server
+      - api-gateway
+
+  # Notification-service docker
+  notification-service:
+    container_name: notification-service
+    image: fikrilamin/notification-service:latest
+    pull_policy: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - zipkin
+      - broker
+      - discovery-server
+      - api-gateway
+
 volumes:
   order-service-postgres:
   inventory-service-postgres:
   mongo-data:
+  mysql_keycloak_data:
+  keycloak_data_container:
+  mysql_keycloak_data2:

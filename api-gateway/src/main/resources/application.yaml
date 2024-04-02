@@ -25,30 +25,31 @@ spring:
           predicates:
             - Path=/api/inventory/**
         - id: discovery-server
-          uri: http://localhost:8761
+          uri: http://discovery-server:8761
           predicates:
             - Path=/eureka/web
           filters:
             - SetPath=/
         - id: discovery-server-statics
-          uri: http://localhost:8761
+          uri: http://discovery-server:8761
           predicates:
             - Path=/eureka/**
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
-          jwk-set-uri: http://localhost:8181/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8080/realms/spring-boot-microservice-realm
+          jwk-set-uri: http://localhost:8080/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
       client:
         provider:
           keycloak:
-            issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
+            user-name-attribute: preferred_username
+            issuer-uri: http://localhost:8080/realms/spring-boot-microservice-realm
         registration:
           spring-cloud-client:
             provider: keycloak
             client-id: spring-cloud-client
-            client-secret: pztyv7oqhiHdAc0wiXWQquU5VwKAIoqK
+            client-secret: X4N2ovcq2orMSpuAZN89LXNI32D8Ink3
             authorization-grant-type: authorization_code
             scope: openid
 
@@ -56,7 +57,9 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka:8761/eureka
+app:
+  eureka-server: localhost
 
 ## Loggin
 logging:

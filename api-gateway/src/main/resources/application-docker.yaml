@@ -1,0 +1,32 @@
+server:
+  port: 7080
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/spring-boot-microservice-realm
+          jwk-set-uri: http://keycloak:8080/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
+      client:
+        provider:
+          keycloak:
+            user-name-attribute: preferred_username
+            issuer-uri: http://keycloak:8080/realms/spring-boot-microservice-realm
+        registration:
+          spring-cloud-client:
+            provider: keycloak
+            client-id: spring-cloud-client
+            client-secret: X4N2ovcq2orMSpuAZN89LXNI32D8Ink3
+            authorization-grant-type: authorization_code
+            scope: openid
+
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://discovery-server:8761/eureka

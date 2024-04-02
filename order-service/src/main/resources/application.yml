@@ -24,8 +24,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8181/realms/spring-boot-microservice-realm
-          jwk-set-uri: http://localhost:8181/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8080/realms/spring-boot-microservice-realm
+          jwk-set-uri: http://localhost:8080/realms/spring-boot-microservice-realm/protocol/openid-connect/certs
   # Apache Kafka
   kafka:
     bootstrap:
