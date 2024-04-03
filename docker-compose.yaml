@@ -201,6 +201,8 @@ services:
     container_name: notification-service
     image: fikrilamin/notification-service:latest
     pull_policy: always
+    ports:
+      - "8085:8085"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
@@ -208,6 +210,36 @@ services:
       - broker
       - discovery-server
       - api-gateway
+
+  ## Promtheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - product-service
+      - inventory-services
+      - order-service
+      - notification-service
+
+  ## grafana
+  grafana:
+    image: grafana/grafana-oss
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
 
 volumes:
   order-service-postgres:
